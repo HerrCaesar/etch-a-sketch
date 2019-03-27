@@ -1,35 +1,70 @@
 const container = document.querySelector('.container');
+const resInput = document.getElementsByName('resolution');
 
-const length = 4;
-container.style.gridTemplateColumns = 'repeat(' + length + ', 1fr)';
-container.style.gridTemplateRows = 'repeat(' + length + ', 1fr)';
+let gridResolution = 50;
 
-for (let i = 0; i < length ** 2; i++)
+populateGrid()
+
+setGridDimensions()
+
+window.onresize = setGridDimensions;
+
+resInput.forEach((resInput) => {
+  resInput.addEventListener('focusout', readResolutionFromInput);
+  resInput.addEventListener('keydown', (event) => {
+    if (event.isComposing || ![9,13].includes(event.keyCode)) {
+      return;
+    }
+    readResolutionFromInput(event);
+  })
+})
+
+function readResolutionFromInput(event)
 {
-  newItem = document.createElement('div');
-  newItem.setAttribute('style',
-    'grid-column: ' + (Math.floor(i / length) + 1) + ' / span 1;'
-    + 'grid-row: ' + (i % length + 1) + ' / span 1;'
-  )
-  newItem.classList.add('cell');
-  newItem.id = 'cell' + i;
-  container.appendChild(newItem)
+  let newGridResolution = Math.min(event.target.value, 100) || gridResolution;
+  if (newGridResolution !== gridResolution)
+  {
+    gridResolution = newGridResolution;
+    populateGrid();
+  }
 }
 
-const delay = 100;
-
-setGridDims()
-
-window.onresize = setGridDims;
-
-function setGridDims()
+function populateGrid()
 {
-  let newDims = newGridDims()
-  container.style.width = newDims + 'px';
-  container.style.height = newDims + 'px';
+  container.style.gridTemplateColumns = 'repeat(' + gridResolution + ', 1fr)';
+  container.style.gridTemplateRows = 'repeat(' + gridResolution + ', 1fr)';
+
+  while (container.lastChild)
+  {
+    container.removeChild(container.lastChild);
+  }
+
+  for (let i = 0; i < gridResolution ** 2; i++)
+  {
+    newItem = document.createElement('div');
+    newItem.setAttribute('style',
+      'grid-column: ' + (Math.floor(i / gridResolution) + 1) + ' / span 1;'
+      + 'grid-row: ' + (i % gridResolution + 1) + ' / span 1;'
+    )
+    
+    newItem.id = 'cell' + i;
+
+    newItem.addEventListener('mouseover', (event) => {
+      event.target.classList.add('black');
+    })
+
+    container.appendChild(newItem);
+  }
 }
 
-function newGridDims()
+function setGridDimensions()
+{
+  let newDimensions = newGridDimensions()
+  container.style.width = newDimensions + 'px';
+  container.style.height = newDimensions + 'px';
+}
+
+function newGridDimensions()
 {
   let width = window.innerWidth;
   if (width <= 300)
@@ -45,27 +80,3 @@ function newGridDims()
     return 584;
   }
 }
-
-
-
-// const setGridDims = () => {
-//   let newDims = newGridDims()
-//   container.style.width = newDims;
-//   container.style.height = newDims;
-// };
-
-
-// (() => {
-//   resizeTaskId = null;
-
-//   window.addEventListener('resize', () => {
-//     if (resizeTaskId !== null) {
-//       clearTimeout(resizeTaskId);
-//     }
-
-//     resizeTaskId = setTimeout(() => {
-//       resizeTaskId = null;
-//       setGridDims();
-//     }, delay);
-//   });
-// })();

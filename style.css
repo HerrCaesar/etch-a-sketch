@@ -6,7 +6,12 @@
     border: 2px solid black;
 }
 
-.cell
+.black
+{
+    background-color: black;
+}
+
+/* .cell
 {
     border: 1px solid black;
-}
+} */
