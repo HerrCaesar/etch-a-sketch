@@ -45,8 +45,16 @@ function toggleBorders() {
   }
 }
 
-// Placeholder for letting user choose brush colour
+// Let user choose brush colour
 let brushColour = 'black';
+document.querySelectorAll('.swatch').forEach((swatch) => {
+  swatch.addEventListener('click', (event) => {
+    let selectedSwatch = document.querySelector('div.swatch.cell-border');
+    if (selectedSwatch) selectedSwatch.classList.remove('border');
+    event.target.classList.add('cell-border');
+    brushColour = event.target.style.backgroundColor;
+  })
+})
 
 // Detect when user's done entering desired brush strength & call to read it
 brushStrengthInput.addEventListener('focusout', (event) => {
@@ -183,6 +191,7 @@ function setGridDimensions()
   let newDimensions = newGridDimensions()
   container.style.width = newDimensions + 'px';
   container.style.height = newDimensions + 'px';
+  document.querySelector('#tools').style.width = newDimensions + 'px';
 }
 
 // Get size of window and return appropriate size for grid
