@@ -1,8 +1,8 @@
 // Define document elements
 const container = document.querySelector('.container');
-const resolutionInputs = document.getElementsByName('resolution');
-const gridlinesBoxes = document.getElementsByName('gridlines');
-const brushStrengthInputs = document.getElementsByName('brushStrength');
+const resolutionInput = document.getElementsByName('resolution')[0];
+const gridlinesBox = document.getElementsByName('gridlines')[0];
+const brushStrengthInput = document.getElementsByName('brushStrength')[0];
 
 // Always get an appropriately sized grid and populate with default res on open
 let gridResolution = 50;
@@ -21,28 +21,42 @@ document.addEventListener('mouseup', (event) => {
 window.onresize = setGridDimensions;
 
 // Toggle gridlines when checkbox is clicked
-gridlinesBoxes.forEach((gridlinesBox) => {
-  gridlinesBox.addEventListener('click', () => {
-    document.querySelectorAll('.container div').forEach((div) => {
-      div.classList.toggle('cell-border');
+gridlinesBox.onclick = toggleBorders;
+
+function toggleBorders() {
+  if (gridlinesBox.checked)
+  {
+    if (+gridResolution + 2 < +container.style.width.substring(0, container.style.width.length -2) / 2)
+    {
+      document.querySelectorAll('.container div').forEach((div,) => {
+        div.classList.add('cell-border');
+      })
+    }
+    else
+    {
+      gridlinesBox.checked = false;
+    }
+  }
+  else
+  {
+    document.querySelectorAll('.container div').forEach((div,) => {
+      div.classList.remove('cell-border');
     })
-  })
-})
+  }
+}
 
 // Placeholder for letting user choose brush colour
 let brushColour = 'black';
 
 // Detect when user's done entering desired brush strength & call to read it
-brushStrengthInputs.forEach((brushStrengthInput) => {
-  brushStrengthInput.addEventListener('focusout', (event) => {
-    setBrushStrength(event.target);
-  });
-  brushStrengthInput.addEventListener('keydown', (event) => {
-    if (event.isComposing || ![9,13].includes(event.keyCode)) {
-      return;
-    }
-    setBrushStrength(event.target);
-  })
+brushStrengthInput.addEventListener('focusout', (event) => {
+  setBrushStrength(event.target);
+});
+brushStrengthInput.addEventListener('keydown', (event) => {
+  if (event.isComposing || ![9,13].includes(event.keyCode)) {
+    return;
+  }
+  setBrushStrength(event.target);
 })
 
 // Set strength of paintbrush
@@ -60,16 +74,14 @@ function setBrushStrength(brushStrengthInput)
 }
 
 // Detect when user's done entering desired resolution & call to read it
-resolutionInputs.forEach((resolutionInput) => {
-  resolutionInput.addEventListener('focusout', (event) => {
-    readResolutionFromInput(event.target);
-  });
-  resolutionInput.addEventListener('keydown', (event) => {
-    if (event.isComposing || ![9,13].includes(event.keyCode)) {
-      return;
-    }
-    readResolutionFromInput(event.target);
-  })
+resolutionInput.addEventListener('focusout', (event) => {
+  readResolutionFromInput(event.target);
+});
+resolutionInput.addEventListener('keydown', (event) => {
+  if (event.isComposing || ![9,13].includes(event.keyCode)) {
+    return;
+  }
+  readResolutionFromInput(event.target);
 })
 
 /* Choose appropriate grid resolution based on input and call to populate grid
@@ -90,45 +102,79 @@ function readResolutionFromInput(resolutionInput)
   }
 }
 
-/* Delete existing cells in grid and repopulate based on requested 
-   resolution, adding appropriate event listeners. */
+/* Delete surplus cells / add extra cells based on requested resolution, adding
+   appropriate event listeners and borders if required. */
 let colouringTime = 0;
 function populateGrid()
 {
   container.style.gridTemplateColumns = 'repeat(' + gridResolution + ', 1fr)';
   container.style.gridTemplateRows = 'repeat(' + gridResolution + ', 1fr)';
 
-  while (container.lastChild)
+  let oldRes = Math.round(container.childElementCount ** 0.5)
+  
+  if (oldRes > gridResolution)
   {
-    container.removeChild(container.lastChild);
+    while (container.childElementCount > gridResolution ** 2)
+    {
+      container.removeChild(container.lastChild);
+    }
   }
-
-  for (let i = 0; i < gridResolution ** 2; i++)
+  else
   {
-    newItem = document.createElement('div');
-    newItem.style.minHeight = '1px';
-    newItem.setAttribute('style',
-      'grid-column: ' + (Math.floor(i / gridResolution) + 1) + ' / span 1;'
-      + 'grid-row: ' + (i % gridResolution + 1) + ' / span 1;'
-    )
-
-    // If mouse button is already down when cell is entered, begin colouring
-    newItem.addEventListener('mouseover', (event) => {
-      if (clicked)
+    let borders = false;
+    if (gridlinesBox.checked)
+    {
+      if (+gridResolution + 2 < +container.style.width.substring(0, container.style.width.length -2) / 2)
       {
-        clearInterval(interval);
-        paintAtIntervals(event.target);
+        borders = true;
       }
-    })
+      else
+      {
+        gridlinesBox.checked = false;
+        toggleBorders;
+      }
+    }
+    
+    for (let i = oldRes ** 2; i < gridResolution ** 2; i++)
+    {
+      let newCell = document.createElement('div');
 
-    newItem.addEventListener('mousedown', (event) => {
-      clicked = true;
+      let doneRes = Math.floor(i ** 0.5);
+      let coOrds = [doneRes + 1, Math.floor((i - doneRes ** 2) / 2) + 1];
+
+      newCell.setAttribute('style',
+        'grid-column: ' + coOrds[(i + 1) % 2] + ' / span 1;'
+        + 'grid-row: ' + coOrds[i % 2] + ' / span 1;'
+      )
+
+      addCellEventListeners(newCell, borders);
+
+      container.appendChild(newCell);
+    }
+  }
+}
+
+function addCellEventListeners(cell, borders)
+{
+  if (borders)
+  {
+    cell.classList.add('cell-border')
+  }
+  
+  // If mouse button is already down when cursor enters cell, begin colouring
+  cell.addEventListener('mouseover', (event) => {
+    if (clicked)
+    {
       clearInterval(interval);
       paintAtIntervals(event.target);
-    })
-
-    container.appendChild(newItem);
-  }
+    }
+  })
+  // If user cliks within cell
+  cell.addEventListener('mousedown', (event) => {
+    clicked = true;
+    clearInterval(interval);
+    paintAtIntervals(event.target);
+  })
 }
 
 // Set width and height of grid (but not # of cells), based on window size
