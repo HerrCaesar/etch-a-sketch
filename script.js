@@ -2,13 +2,14 @@
 const container = document.querySelector('.container');
 const resolutionInputs = document.getElementsByName('resolution');
 const gridlinesBoxes = document.getElementsByName('gridlines');
+const brushStrengthInputs = document.getElementsByName('brushStrength');
 
-// Always get an appropriately sized grid and populate with default res on open```
+// Always get an appropriately sized grid and populate with default res on open
 let gridResolution = 50;
 setGridDimensions()
 populateGrid()
 
-/* Store where the mouse is releaded over the document. Use document over grid
+/* Store where the mouse is released over the document. Use document over grid
    so that if user releases mouse outside grid it will toggle the bool.*/
 let clicked = false, interval = 0;
 document.addEventListener('mouseup', (event) => {
@@ -28,30 +29,64 @@ gridlinesBoxes.forEach((gridlinesBox) => {
   })
 })
 
-// Placeholder for letting user choose brush strength and colour
+// Placeholder for letting user choose brush colour
 let brushColour = 'black';
-let brushStrength = 0.2;
 
-// Detect when user's finished entering desired resolution and call to read it
+// Detect when user's done entering desired brush strength & call to read it
+brushStrengthInputs.forEach((brushStrengthInput) => {
+  brushStrengthInput.addEventListener('focusout', (event) => {
+    setBrushStrength(event.target);
+  });
+  brushStrengthInput.addEventListener('keydown', (event) => {
+    if (event.isComposing || ![9,13].includes(event.keyCode)) {
+      return;
+    }
+    setBrushStrength(event.target);
+  })
+})
+
+// Set strength of paintbrush
+let brushStrength = 0.2;
+function setBrushStrength(brushStrengthInput)
+{
+  if (brushStrengthInput.value > 0 && brushStrengthInput.value <= 10)
+  {
+    brushStrength = 1 / (11 - brushStrengthInput.value);
+  }
+  else
+  {
+    brushStrengthInput.value = 11 - Math.round(1 / brushStrength);
+  }
+}
+
+// Detect when user's done entering desired resolution & call to read it
 resolutionInputs.forEach((resolutionInput) => {
-  resolutionInput.addEventListener('focusout', readResolutionFromInput);
+  resolutionInput.addEventListener('focusout', (event) => {
+    readResolutionFromInput(event.target);
+  });
   resolutionInput.addEventListener('keydown', (event) => {
     if (event.isComposing || ![9,13].includes(event.keyCode)) {
       return;
     }
-    readResolutionFromInput(event);
+    readResolutionFromInput(event.target);
   })
 })
 
 /* Choose appropriate grid resolution based on input and call to populate grid
    if resolution has changed. */
-function readResolutionFromInput(event)
+function readResolutionFromInput(resolutionInput)
 {
-  let newGridResolution = Math.min(cell.value, 100) || gridResolution;
-  if (newGridResolution !== gridResolution)
+  if (resolutionInput.value > 0 && resolutionInput.value <= 500)
   {
-    gridResolution = newGridResolution;
-    populateGrid();
+    if (resolutionInput.value !== gridResolution)
+    {
+      gridResolution = resolutionInput.value;
+      populateGrid();
+    }
+  }
+  else
+  {
+    resolutionInput.value = gridResolution;
   }
 }
 
