@@ -21,7 +21,7 @@ document.addEventListener('mouseup', (event) => {
 window.onresize = setGridDimensions;
 
 // Let user choose brush colour
-let brushColour = 'black';
+let brushColour = 'rgb(0,0,0)';
 document.querySelectorAll('.swatch').forEach((swatch) => {
   swatch.addEventListener('click', (event) => {
     let selectedSwatch = document.querySelector('div.swatch.cell-border');
@@ -47,7 +47,7 @@ resetButton.onclick = function() {
 // Clean make all cells in grid white again
 function resetCanvas() {
   document.querySelectorAll('.container div').forEach((cell) => {
-    cell.style.backgroundColor = 'white';
+    cell.style.backgroundColor = 'rgba(255,255,255,1)';
   })
 }
 
@@ -245,24 +245,27 @@ function newGridDimensions()
    call function that actually paints cell. */
 function paintAtIntervals(cell)
 {
-  if (cell.style.backgroundColor !== brushColour)
+  let cellColour = cell.style.backgroundColor;
+  let regexp = /.*\((\d*(,\s?\d*){2})(,\s?([01](\.[\d]+)?))?\)$/;
+  if (!cellColour || regexp.exec(cellColour)[1] != regexp.exec(brushColour)[1])
   {
-    cell.style.opacity = 0;
-    cell.style.backgroundColor = brushColour;
+    cellColour = cell.style.backgroundColor = brushColour.replace(regexp, 'rgba($1,0)');
   }
-  if (cell.style.opacity != 1)
+  if (+regexp.exec(cellColour)[4] != 1)
   {
-    paintCell(cell);
-    interval = setInterval(paintCell, 200, cell);
+    paintCell(cell, regexp);
+    interval = setInterval(paintCell, 200, cell, regexp);
   }
 }
 
-/* Paint cell (increase opacity). Clear interval to stop repeating if opacity 
+/* Paint cell (increase alpha). Clear interval to stop repeating if opacity 
    is 1. (Also cleared when a(nother) mousedown or mouseover event fires.) */
-function paintCell(cell)
+function paintCell(cell, regexp)
 {
-  cell.style.opacity = Math.min(+cell.style.opacity + brushStrength, 1);
-  if (cell.style.opacity == 1)
+  let cellColour = cell.style.backgroundColor;
+  let newCellAlpha = Math.min(+regexp.exec(cellColour)[4] + brushStrength, 1);
+  cell.style.backgroundColor = cellColour.replace(regexp, 'rgba($1,' + newCellAlpha + ')');
+  if (newCellAlpha == 1)
   {
     clearInterval(interval);
   }
