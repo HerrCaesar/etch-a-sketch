@@ -32,7 +32,7 @@ document.querySelectorAll('.swatch').forEach((swatch) => {
 })
 
 // Reset canvas on button click
-resetButton = document.querySelector('.button');
+let resetButton = document.querySelector('.button');
 resetButton.onclick = function() {
   resetButton.classList.remove('outset');
   resetButton.classList.add('inset');
@@ -47,7 +47,7 @@ resetButton.onclick = function() {
 // Clean make all cells in grid white again
 function resetCanvas() {
   document.querySelectorAll('.container div').forEach((cell) => {
-    cell.style.opacity = 0;
+    cell.style.backgroundColor = 'white';
   })
 }
 
@@ -75,21 +75,27 @@ function toggleBorders() {
   }
 }
 
+// Detect when user starts entering brush strength
+let brushStrengthFocus = false;
+brushStrengthInput.onfocus = () => brushStrengthFocus = true;
+
 // Detect when user's done entering desired brush strength & call to read it
-brushStrengthInput.addEventListener('focusout', (event) => {
-  setBrushStrength(event.target);
-});
+brushStrengthInput.onblur = function() {
+  setBrushStrength();
+};
 brushStrengthInput.addEventListener('keydown', (event) => {
   if (event.isComposing || ![9,13].includes(event.keyCode)) {
     return;
   }
-  setBrushStrength(event.target);
+  document.activeElement.blur();
+  setBrushStrength();
 })
 
 // Set strength of paintbrush
 let brushStrength = 0.2;
-function setBrushStrength(brushStrengthInput)
+function setBrushStrength()
 {
+  brushStrengthFocus = false;
   if (brushStrengthInput.value > 0 && brushStrengthInput.value <= 10)
   {
     brushStrength = 1 / (11 - brushStrengthInput.value);
@@ -200,6 +206,10 @@ function addCellEventListeners(cell, borders)
   cell.addEventListener('mousedown', (event) => {
     clicked = true;
     clearInterval(interval);
+    if (brushStrengthFocus)
+    {
+      setBrushStrength();
+    }
     paintAtIntervals(event.target);
   })
 }
