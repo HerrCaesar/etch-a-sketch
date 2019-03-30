@@ -20,9 +20,39 @@ document.addEventListener('mouseup', (event) => {
 // Call function to reset grid dimensions when user finishes resizing window
 window.onresize = setGridDimensions;
 
+// Let user choose brush colour
+let brushColour = 'black';
+document.querySelectorAll('.swatch').forEach((swatch) => {
+  swatch.addEventListener('click', (event) => {
+    let selectedSwatch = document.querySelector('div.swatch.cell-border');
+    if (selectedSwatch) selectedSwatch.classList.remove('cell-border');
+    event.target.classList.add('cell-border');
+    brushColour = event.target.style.backgroundColor;
+  })
+})
+
+// Reset canvas on button click
+resetButton = document.querySelector('.button');
+resetButton.onclick = function() {
+  resetButton.classList.remove('outset');
+  resetButton.classList.add('inset');
+  resetCanvas()
+
+  setTimeout(function() {
+    resetButton.classList.remove('inset');
+    resetButton.classList.add('outset');
+  }, 100);
+}
+
+// Clean make all cells in grid white again
+function resetCanvas() {
+  document.querySelectorAll('.container div').forEach((cell) => {
+    cell.style.opacity = 0;
+  })
+}
+
 // Toggle gridlines when checkbox is clicked
 gridlinesBox.onclick = toggleBorders;
-
 function toggleBorders() {
   if (gridlinesBox.checked)
   {
@@ -44,17 +74,6 @@ function toggleBorders() {
     })
   }
 }
-
-// Let user choose brush colour
-let brushColour = 'black';
-document.querySelectorAll('.swatch').forEach((swatch) => {
-  swatch.addEventListener('click', (event) => {
-    let selectedSwatch = document.querySelector('div.swatch.cell-border');
-    if (selectedSwatch) selectedSwatch.classList.remove('border');
-    event.target.classList.add('cell-border');
-    brushColour = event.target.style.backgroundColor;
-  })
-})
 
 // Detect when user's done entering desired brush strength & call to read it
 brushStrengthInput.addEventListener('focusout', (event) => {
@@ -204,7 +223,7 @@ function newGridDimensions()
   }
   else if (width <= 600)
   {
-    return width - 16;
+    return width - 20;
   }
   else
   {

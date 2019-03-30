@@ -1,8 +1,10 @@
 #tools
 {
+    margin: 10px 0;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
 }
 
 #colour-grid
@@ -17,7 +19,6 @@
 
 .container
 {
-    padding: 10px;
     display: grid;
     align-items: stretch;
     border: 2px solid black;
@@ -26,6 +27,25 @@
 .cell-border
 {
     border: 1px solid black;
+}
+
+.button
+{
+    border-width: 1px;
+    border-color: #e6e6e6;
+    padding: 6px;
+    font-size: 10pt;
+    border-radius: 8%;
+}
+
+.outset
+{
+    border-style: outset;
+}
+
+.inset
+{
+    border-style: inset;
 }
 
 body
