@@ -1,100 +1,108 @@
 // Define document elements
-const container = document.querySelector('.container');
-const resolutionInput = document.getElementsByName('resolution')[0];
-const gridlinesBox = document.getElementsByName('gridlines')[0];
-const brushStrengthInput = document.getElementsByName('brushStrength')[0];
-let resetButton = document.querySelector('input[name=resetCanvas]');
-let modeButton = document.querySelector('input[name=mode]');
+const container = document.querySelector(".container");
+const resolutionInput = document.getElementsByName("resolution")[0];
+const gridlinesBox = document.getElementsByName("gridlines")[0];
+const brushStrengthInput = document.getElementsByName("brushStrength")[0];
+let resetButton = document.querySelector("input[name=resetCanvas]");
+let modeButton = document.querySelector("input[name=mode]");
 
 // Set defaults
 let gridResolution = 50;
-let clicked = false, interval = 0;
-const modeArr = ['P', 'Paint','E', 'Etch-A-Sketch'];
-let mode = 'P';
+let clicked = false;
+let interval = 0;
+const modeArr = ["P", "Paint","E", "Etch-A-Sketch"];
+let mode = "P";
 let brushStrengthFocus = false;
 let brushStrength = 1;
 let colouringTime = 0;
 
 // Always get an appropriately sized grid and populate with default res on open
-setGridDimensions()
-populateGrid()
+setGridDimensions();
+populateGrid();
 
 /* Store where the mouse is released over the document. Use document over grid
    so that if user releases mouse outside grid it will toggle the bool.*/
-document.addEventListener('mouseup', (event) => {
+document.onmouseup = function(event) {
   clicked = false;
   clearInterval(interval);
-})
+};
 
 // Call function to reset grid dimensions when user finishes resizing window
 window.onresize = setGridDimensions;
 
 // Let user choose brush colour
-let brushColour = 'rgb(0,0,0)';
-document.querySelectorAll('.swatch').forEach((swatch) => {
-  swatch.addEventListener('click', (event) => {
-    let selectedSwatch = document.querySelector('div.swatch.swatch-outline');
+let brushColour = "rgb(0,0,0)";
+document.querySelectorAll(".swatch").forEach(function(swatch) {
+  swatch.onclick = function(event) {
+    let selectedSwatch = document.querySelector("div.swatch.swatch-outline");
     if (selectedSwatch)
     {
-      selectedSwatch.classList.remove('swatch-outline');
+      selectedSwatch.classList.remove("swatch-outline");
     }
-    else document.querySelector('#rainbow').classList.remove('swatch-outline');
-    event.target.classList.add('swatch-outline');
+    else
+    {
+      document.querySelector("#rainbow").classList.remove("swatch-outline");
+    }
+    event.target.classList.add("swatch-outline");
     brushColour = event.target.style.backgroundColor;
-  })
-})
+  };
+});
 
 // Or let user choose rainbow-brush
-document.querySelector('#rainbow').onclick = function(event) {
-  let selectedSwatch = document.querySelector('div.swatch.swatch-outline');
-  if (selectedSwatch) selectedSwatch.classList.remove('swatch-outline');
-  event.target.classList.add('swatch-outline');
-  brushColour = 'rainbow';
-}
+document.querySelector("#rainbow").onclick = function(event) {
+  let selectedSwatch = document.querySelector("div.swatch.swatch-outline");
+  if (selectedSwatch)
+  {
+    selectedSwatch.classList.remove("swatch-outline");
+  }
+  event.target.classList.add("swatch-outline");
+  brushColour = "rainbow";
+};
 
 // Reset canvas on button click
 resetButton.onclick = function() {
-  resetButton.classList.remove('outset');
-  resetButton.classList.add('inset');
-  resetCanvas()
+  resetButton.classList.remove("outset");
+  resetButton.classList.add("inset");
+  resetCanvas();
 
   setTimeout(function() {
-    resetButton.classList.remove('inset');
-    resetButton.classList.add('outset');
+    resetButton.classList.remove("inset");
+    resetButton.classList.add("outset");
   }, 100);
-}
+};
 
-// Display 'Change Mode' on mode button when user hovers over it
+// Display "Change Mode" on mode button when user hovers over it
 modeButton.onmouseover = function() {
-  modeButton.value = 'Change Mode';
-}
+  modeButton.value = "Change Mode";
+};
 modeButton.onmouseout = function() {
   modeButton.value = modeArr[modeArr.indexOf(mode) + 1];
-}
+};
 
 // Toggle mode: P = MS Paint; E = Etch-A-Sketch
 modeButton.onclick = function() {
-  modeButton.classList.remove('outset');
-  modeButton.classList.add('inset');
+  modeButton.classList.remove("outset");
+  modeButton.classList.add("inset");
   mode = modeArr[(modeArr.indexOf(mode) + 2) % 4];
   modeButton.value = modeArr[modeArr.indexOf(mode) + 1];
 
   setTimeout(function() {
-    modeButton.classList.remove('inset');
-    modeButton.classList.add('outset');
+    modeButton.classList.remove("inset");
+    modeButton.classList.add("outset");
   }, 100);
-}
+};
 
 // Toggle gridlines when checkbox is clicked
 gridlinesBox.onclick = toggleBorders;
 function toggleBorders() {
   if (gridlinesBox.checked)
   {
-    if (+gridResolution + 2 < +container.style.width.substring(0, container.style.width.length -2) / 2)
+    let contWidth = container.style.width;
+    if (+gridResolution + 2 < +contWidth.substring(0, contWidth.length -2) / 2)
     {
-      document.querySelectorAll('.container div').forEach((div,) => {
-        div.classList.add('cell-border');
-      })
+      document.querySelectorAll(".container div").forEach(function(div) {
+        div.classList.add("cell-border");
+      });
     }
     else
     {
@@ -103,32 +111,37 @@ function toggleBorders() {
   }
   else
   {
-    document.querySelectorAll('.container div').forEach((div,) => {
-      div.classList.remove('cell-border');
-    })
+    document.querySelectorAll(".container div").forEach(function(div) {
+      div.classList.remove("cell-border");
+    });
   }
 }
 
 // Detect when user starts entering brush strength
-brushStrengthInput.onfocus = () => brushStrengthFocus = true;
+brushStrengthInput.onfocus = function() {
+  brushStrengthFocus = true;
+};
 
 // Detect when user's done entering desired brush strength & call to read it
 brushStrengthInput.onblur = function() {
-  setBrushStrength();
+  if (brushStrengthFocus)
+  {
+    setBrushStrength();
+  }
 };
-brushStrengthInput.addEventListener('keydown', (event) => {
-  if (event.isComposing || ![9,13].includes(event.keyCode)) {
+brushStrengthInput.onkeydown = function(event) {
+  if (event.isComposing || event.keyCode != 9 && event.keyCode != 13) {
     return;
   }
   document.activeElement.blur();
   setBrushStrength();
-})
+};
 
 // Make all cells in grid white again
 function resetCanvas() {
-  document.querySelectorAll('.container div').forEach((cell) => {
-    cell.style.backgroundColor = 'rgba(255,255,255,1)';
-  })
+  document.querySelectorAll(".container div").forEach(function(cell) {
+    cell.style.backgroundColor = "rgba(255,255,255,1)";
+  });
 }
 
 // Set strength of paintbrush
@@ -146,15 +159,15 @@ function setBrushStrength()
 }
 
 // Detect when user's done entering desired resolution & call to read it
-resolutionInput.addEventListener('focusout', (event) => {
+resolutionInput.onblur = function(event) {
   readResolutionFromInput(event.target);
-});
-resolutionInput.addEventListener('keydown', (event) => {
-  if (event.isComposing || ![9,13].includes(event.keyCode)) {
+};
+resolutionInput.onkeydown = function(event) {
+  if (event.isComposing || event.keyCode != 9 && event.keyCode != 13) {
     return;
   }
   readResolutionFromInput(event.target);
-})
+};
 
 /* Choose appropriate grid resolution based on input and call to populate grid
    if resolution has changed. */
@@ -178,11 +191,11 @@ function readResolutionFromInput(resolutionInput)
    appropriate event listeners and borders if required. */
 function populateGrid()
 {
-  container.style.gridTemplateColumns = 'repeat(' + gridResolution + ', 1fr)';
-  container.style.gridTemplateRows = 'repeat(' + gridResolution + ', 1fr)';
+  container.style.gridTemplateColumns = "repeat(" + gridResolution + ", 1fr)";
+  container.style.gridTemplateRows = "repeat(" + gridResolution + ", 1fr)";
 
-  let oldRes = Math.round(container.childElementCount ** 0.5)
-  
+  let oldRes = Math.round(container.childElementCount ** 0.5);
+
   if (oldRes > gridResolution)
   {
     while (container.childElementCount > gridResolution ** 2)
@@ -195,7 +208,9 @@ function populateGrid()
     let borders = false;
     if (gridlinesBox.checked)
     {
-      if (+gridResolution + 2 < +container.style.width.substring(0, container.style.width.length -2) / 2)
+      let contWidth = container.style.width;
+      if (+gridResolution + 2 <
+          +contWidth.substring(0, contWidth.length -2) / 2)
       {
         borders = true;
       }
@@ -205,22 +220,25 @@ function populateGrid()
         toggleBorders;
       }
     }
-    
-    for (let i = oldRes ** 2; i < gridResolution ** 2; i++)
+
+    let i = oldRes ** 2;
+    while (i < gridResolution ** 2)
     {
-      let newCell = document.createElement('div');
+      let newCell = document.createElement("div");
 
       let doneRes = Math.floor(i ** 0.5);
       let coOrds = [doneRes + 1, Math.floor((i - doneRes ** 2) / 2) + 1];
 
-      newCell.setAttribute('style',
-        'grid-column: ' + coOrds[(i + 1) % 2] + ' / span 1;'
-        + 'grid-row: ' + coOrds[i % 2] + ' / span 1;'
-      )
+      newCell.setAttribute("style",
+        "grid-column: " + coOrds[(i + 1) % 2] + " / span 1;"
+        + "grid-row: " + coOrds[i % 2] + " / span 1;"
+      );
 
       addCellEventListeners(newCell, borders);
 
       container.appendChild(newCell);
+
+      i++;
     }
   }
 }
@@ -229,20 +247,20 @@ function addCellEventListeners(cell, borders)
 {
   if (borders)
   {
-    cell.classList.add('cell-border')
+    cell.classList.add("cell-border");
   }
-  
+
   // If mouse button is already down when cursor enters cell, begin colouring
-  cell.addEventListener('mouseover', (event) => {
-    if (clicked || mode == 'E')
+  cell.onmouseover = function(event) {
+    if (clicked || mode == "E")
     {
       clearInterval(interval);
       paintAtIntervals(event.target);
     }
-  })
-  // If user cliks within cell
-  cell.addEventListener('mousedown', (event) => {
-    if (mode == 'P')
+  };
+  // If user clicks within cell
+  cell.onmousedown = function(event) {
+    if (mode == "P")
     {
       clicked = true;
       clearInterval(interval);
@@ -252,16 +270,16 @@ function addCellEventListeners(cell, borders)
       }
       paintAtIntervals(event.target);
     }
-  })
+  };
 }
 
 // Set width and height of grid (but not # of cells), based on window size
 function setGridDimensions()
 {
-  let newDimensions = newGridDimensions()
-  container.style.width = newDimensions + 'px';
-  container.style.height = newDimensions + 'px';
-  document.querySelector('#options').style.width = newDimensions + 'px';
+  let newDimensions = newGridDimensions();
+  container.style.width = newDimensions + "px";
+  container.style.height = newDimensions + "px";
+  document.querySelector("#options").style.width = newDimensions + "px";
 }
 
 // Get size of window and return appropriate size for grid
@@ -282,11 +300,11 @@ function newGridDimensions()
   }
 }
 
-/* Reset cell if it's not paintbrush colour, then, at appropriate intervals, 
+/* Reset cell if it's not paintbrush colour, then, at appropriate intervals,
    call function that actually paints cell. */
 function paintAtIntervals(cell)
 {
-  if (brushColour == 'rainbow')
+  if (brushColour == "rainbow")
   {
     paintCell(cell);
     interval = setInterval(paintCell, 200, cell);
@@ -295,9 +313,11 @@ function paintAtIntervals(cell)
   {
     let cellColour = cell.style.backgroundColor;
     let regexp = /.*\((\d*(,\s?\d*){2})(,\s?([01](\.[\d]+)?))?\)$/;
-    if (!cellColour || regexp.exec(cellColour)[1] != regexp.exec(brushColour)[1])
+    if (!cellColour ||
+        regexp.exec(cellColour)[1] != regexp.exec(brushColour)[1])
     {
-      cellColour = cell.style.backgroundColor = brushColour.replace(regexp, 'rgba($1,0)');
+      cell.style.backgroundColor = brushColour.replace(regexp, "rgba($1,0)");
+      cellColour = cell.style.backgroundColor;
     }
     if (+regexp.exec(cellColour)[4] != 1)
     {
@@ -307,19 +327,22 @@ function paintAtIntervals(cell)
   }
 }
 
-/* Paint cell (increase alpha). Clear interval to stop repeating if opacity 
+/* Paint cell (increase alpha). Clear interval to stop repeating if opacity
    is 1. (Also cleared when a(nother) mousedown or mouseover event fires.) */
 function paintCell(cell, regexp)
 {
-  if (brushColour == 'rainbow')
+  if (brushColour == "rainbow")
   {
-    cell.style.backgroundColor = 'rgb(' + pickRandRGB() + ', ' + pickRandRGB() + ', ' + pickRandRGB() + ')'
+    cell.style.backgroundColor = "rgb(" + pickRandRGB() + ", " +
+                                 pickRandRGB() + ", " + pickRandRGB() + ")";
   }
   else
   {
     let cellColour = cell.style.backgroundColor;
-    let newCellAlpha = Math.min(+regexp.exec(cellColour)[4] + brushStrength, 1);
-    cell.style.backgroundColor = cellColour.replace(regexp, 'rgba($1,' + newCellAlpha + ')');
+    let newCellAlpha = Math.min(+regexp.exec(cellColour)[4] +
+                       brushStrength, 1);
+    cell.style.backgroundColor = cellColour.replace(regexp, "rgba($1," +
+                                 newCellAlpha + ")");
     if (newCellAlpha == 1)
     {
       clearInterval(interval);
