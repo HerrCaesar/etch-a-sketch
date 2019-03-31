@@ -8,30 +8,43 @@
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-    <div id="tools">
-        <div>
-            <input type="button" name="resetCanvas" class="button outset" value="Reset Canvas">
+    <div id="options">
+        <div class="optBlock">
+            <div class="input">
+                Resolution<br>
+                <input type="number" name="resolution" min=1 max=500 value=50>
+            </div>
+            <div class="input">
+                Gridlines<br>
+                <input type="checkbox" name="gridlines">
+            </div>
+            <div class="input">
+                Brush Strength<br>
+                <input type="number" name="brushStrength" min=1 max=10 value=10>
+            </div>
         </div>
-        <div>Resolution:<br>
-            <input type="number" name="resolution" min=1 max=500 value=50>
-        </div>
-        <div>Gridlines:<br>
-            <input type="checkbox" name="gridlines">
-        </div>
-        <div>Brush strength:<br>
-            <input type="number" name="brushStrength" min=1 max=10 value=6>
-        </div>
-        <div id="colour-grid">
-            <div class="swatch" style="background-color: rgba(0,0,0,1)"></div>
-            <div class="swatch" style="background-color: rgba(0,0,255,1)"></div>
-            <div class="swatch" style="background-color: rgba(255,165,0,1)"></div>
-            <div class="swatch" style="background-color: rgba(255,0,0,1)"></div>
-            <div class="swatch" style="background-color: rgba(165,42,42,1)"></div>
-            <div class="swatch" style="background-color: rgba(255,255,255,1)"></div>
-            <div class="swatch" style="background-color: rgba(0,128,0,1)"></div>
-            <div class="swatch" style="background-color: rgba(255,255,0,1)"></div>
-            <div class="swatch" style="background-color: rgba(255,192,203,1)"></div>
-            <div class="swatch" style="background-color: rgba(128,128,128,1)"></div>
+        <div class="optBlock">
+            <div id="colour-grid">
+                <div class="swatch cell-border" style="background-color: rgba(0,0,0,1)"></div>
+                <div class="swatch" style="background-color: rgba(0,0,255,1)"></div>
+                <div class="swatch" style="background-color: rgba(255,165,0,1)"></div>
+                <div class="swatch" style="background-color: rgba(255,0,0,1)"></div>
+                <div class="swatch" style="background-color: rgba(165,42,42,1)"></div>
+                <div class="swatch" style="background-color: rgba(255,255,255,1)"></div>
+                <div class="swatch" style="background-color: rgba(0,128,0,1)"></div>
+                <div class="swatch" style="background-color: rgba(255,255,0,1)"></div>
+                <div class="swatch" style="background-color: rgba(255,192,203,1)"></div>
+                <div class="swatch" style="background-color: rgba(128,128,128,1)"></div>
+            </div>
+            <div id="rainbow"></div>
+            <div>
+                <div id="buttons">
+                    <input type="button" name="resetCanvas" class="button outset" value="Blank Canvas">
+                </div>
+                <div>
+                    <input type="button" name="mode" class="button outset" value="Etch-A-Sketch Mode">
+                </div>
+            </div>
         </div>
     </div>
     <div class="container">

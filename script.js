@@ -24,12 +24,24 @@ window.onresize = setGridDimensions;
 let brushColour = 'rgb(0,0,0)';
 document.querySelectorAll('.swatch').forEach((swatch) => {
   swatch.addEventListener('click', (event) => {
-    let selectedSwatch = document.querySelector('div.swatch.cell-border');
-    if (selectedSwatch) selectedSwatch.classList.remove('cell-border');
-    event.target.classList.add('cell-border');
+    let selectedSwatch = document.querySelector('div.swatch.swatch-outline');
+    if (selectedSwatch)
+    {
+      selectedSwatch.classList.remove('swatch-outline');
+    }
+    else document.querySelector('#rainbow').classList.remove('swatch-outline');
+    event.target.classList.add('swatch-outline');
     brushColour = event.target.style.backgroundColor;
   })
 })
+
+// Or let them choose rainbow
+document.querySelector('#rainbow').onclick = function(event) {
+  let selectedSwatch = document.querySelector('div.swatch.swatch-outline');
+  if (selectedSwatch) selectedSwatch.classList.remove('swatch-outline');
+  event.target.classList.add('swatch-outline');
+  brushColour = 'rainbow';
+}
 
 // Reset canvas on button click
 let resetButton = document.querySelector('.button');
@@ -92,7 +104,7 @@ brushStrengthInput.addEventListener('keydown', (event) => {
 })
 
 // Set strength of paintbrush
-let brushStrength = 0.2;
+let brushStrength = 1;
 function setBrushStrength()
 {
   brushStrengthFocus = false;
@@ -220,7 +232,7 @@ function setGridDimensions()
   let newDimensions = newGridDimensions()
   container.style.width = newDimensions + 'px';
   container.style.height = newDimensions + 'px';
-  document.querySelector('#tools').style.width = newDimensions + 'px';
+  document.querySelector('#options').style.width = newDimensions + 'px';
 }
 
 // Get size of window and return appropriate size for grid
@@ -245,16 +257,24 @@ function newGridDimensions()
    call function that actually paints cell. */
 function paintAtIntervals(cell)
 {
-  let cellColour = cell.style.backgroundColor;
-  let regexp = /.*\((\d*(,\s?\d*){2})(,\s?([01](\.[\d]+)?))?\)$/;
-  if (!cellColour || regexp.exec(cellColour)[1] != regexp.exec(brushColour)[1])
+  if (brushColour == 'rainbow')
   {
-    cellColour = cell.style.backgroundColor = brushColour.replace(regexp, 'rgba($1,0)');
+    paintCell(cell);
+    interval = setInterval(paintCell, 200, cell);
   }
-  if (+regexp.exec(cellColour)[4] != 1)
+  else
   {
-    paintCell(cell, regexp);
-    interval = setInterval(paintCell, 200, cell, regexp);
+    let cellColour = cell.style.backgroundColor;
+    let regexp = /.*\((\d*(,\s?\d*){2})(,\s?([01](\.[\d]+)?))?\)$/;
+    if (!cellColour || regexp.exec(cellColour)[1] != regexp.exec(brushColour)[1])
+    {
+      cellColour = cell.style.backgroundColor = brushColour.replace(regexp, 'rgba($1,0)');
+    }
+    if (+regexp.exec(cellColour)[4] != 1)
+    {
+      paintCell(cell, regexp);
+      interval = setInterval(paintCell, 200, cell, regexp);
+    }
   }
 }
 
@@ -262,11 +282,24 @@ function paintAtIntervals(cell)
    is 1. (Also cleared when a(nother) mousedown or mouseover event fires.) */
 function paintCell(cell, regexp)
 {
-  let cellColour = cell.style.backgroundColor;
-  let newCellAlpha = Math.min(+regexp.exec(cellColour)[4] + brushStrength, 1);
-  cell.style.backgroundColor = cellColour.replace(regexp, 'rgba($1,' + newCellAlpha + ')');
-  if (newCellAlpha == 1)
+  if (brushColour == 'rainbow')
   {
-    clearInterval(interval);
+    cell.style.backgroundColor = 'rgb(' + pickRandRGB() + ', ' + pickRandRGB() + ', ' + pickRandRGB() + ')'
   }
+  else
+  {
+    let cellColour = cell.style.backgroundColor;
+    let newCellAlpha = Math.min(+regexp.exec(cellColour)[4] + brushStrength, 1);
+    cell.style.backgroundColor = cellColour.replace(regexp, 'rgba($1,' + newCellAlpha + ')');
+    if (newCellAlpha == 1)
+    {
+      clearInterval(interval);
+    }
+  }
+}
+
+// Pick random number between 0 and 255 for RGB value
+function pickRandRGB()
+{
+  return Math.floor(Math.random() * 256);
 }
