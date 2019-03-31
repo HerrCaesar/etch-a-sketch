@@ -3,15 +3,24 @@ const container = document.querySelector('.container');
 const resolutionInput = document.getElementsByName('resolution')[0];
 const gridlinesBox = document.getElementsByName('gridlines')[0];
 const brushStrengthInput = document.getElementsByName('brushStrength')[0];
+let resetButton = document.querySelector('input[name=resetCanvas]');
+let modeButton = document.querySelector('input[name=mode]');
+
+// Set defaults
+let gridResolution = 50;
+let clicked = false, interval = 0;
+const modeArr = ['P', 'Paint','E', 'Etch-A-Sketch'];
+let mode = 'P';
+let brushStrengthFocus = false;
+let brushStrength = 1;
+let colouringTime = 0;
 
 // Always get an appropriately sized grid and populate with default res on open
-let gridResolution = 50;
 setGridDimensions()
 populateGrid()
 
 /* Store where the mouse is released over the document. Use document over grid
    so that if user releases mouse outside grid it will toggle the bool.*/
-let clicked = false, interval = 0;
 document.addEventListener('mouseup', (event) => {
   clicked = false;
   clearInterval(interval);
@@ -35,7 +44,7 @@ document.querySelectorAll('.swatch').forEach((swatch) => {
   })
 })
 
-// Or let them choose rainbow
+// Or let user choose rainbow-brush
 document.querySelector('#rainbow').onclick = function(event) {
   let selectedSwatch = document.querySelector('div.swatch.swatch-outline');
   if (selectedSwatch) selectedSwatch.classList.remove('swatch-outline');
@@ -44,7 +53,6 @@ document.querySelector('#rainbow').onclick = function(event) {
 }
 
 // Reset canvas on button click
-let resetButton = document.querySelector('.button');
 resetButton.onclick = function() {
   resetButton.classList.remove('outset');
   resetButton.classList.add('inset');
@@ -56,11 +64,25 @@ resetButton.onclick = function() {
   }, 100);
 }
 
-// Clean make all cells in grid white again
-function resetCanvas() {
-  document.querySelectorAll('.container div').forEach((cell) => {
-    cell.style.backgroundColor = 'rgba(255,255,255,1)';
-  })
+// Display 'Change Mode' on mode button when user hovers over it
+modeButton.onmouseover = function() {
+  modeButton.value = 'Change Mode';
+}
+modeButton.onmouseout = function() {
+  modeButton.value = modeArr[modeArr.indexOf(mode) + 1];
+}
+
+// Toggle mode: P = MS Paint; E = Etch-A-Sketch
+modeButton.onclick = function() {
+  modeButton.classList.remove('outset');
+  modeButton.classList.add('inset');
+  mode = modeArr[(modeArr.indexOf(mode) + 2) % 4];
+  modeButton.value = modeArr[modeArr.indexOf(mode) + 1];
+
+  setTimeout(function() {
+    modeButton.classList.remove('inset');
+    modeButton.classList.add('outset');
+  }, 100);
 }
 
 // Toggle gridlines when checkbox is clicked
@@ -88,7 +110,6 @@ function toggleBorders() {
 }
 
 // Detect when user starts entering brush strength
-let brushStrengthFocus = false;
 brushStrengthInput.onfocus = () => brushStrengthFocus = true;
 
 // Detect when user's done entering desired brush strength & call to read it
@@ -103,8 +124,14 @@ brushStrengthInput.addEventListener('keydown', (event) => {
   setBrushStrength();
 })
 
+// Make all cells in grid white again
+function resetCanvas() {
+  document.querySelectorAll('.container div').forEach((cell) => {
+    cell.style.backgroundColor = 'rgba(255,255,255,1)';
+  })
+}
+
 // Set strength of paintbrush
-let brushStrength = 1;
 function setBrushStrength()
 {
   brushStrengthFocus = false;
@@ -149,7 +176,6 @@ function readResolutionFromInput(resolutionInput)
 
 /* Delete surplus cells / add extra cells based on requested resolution, adding
    appropriate event listeners and borders if required. */
-let colouringTime = 0;
 function populateGrid()
 {
   container.style.gridTemplateColumns = 'repeat(' + gridResolution + ', 1fr)';
@@ -208,7 +234,7 @@ function addCellEventListeners(cell, borders)
   
   // If mouse button is already down when cursor enters cell, begin colouring
   cell.addEventListener('mouseover', (event) => {
-    if (clicked)
+    if (clicked || mode == 'E')
     {
       clearInterval(interval);
       paintAtIntervals(event.target);
@@ -216,13 +242,16 @@ function addCellEventListeners(cell, borders)
   })
   // If user cliks within cell
   cell.addEventListener('mousedown', (event) => {
-    clicked = true;
-    clearInterval(interval);
-    if (brushStrengthFocus)
+    if (mode == 'P')
     {
-      setBrushStrength();
+      clicked = true;
+      clearInterval(interval);
+      if (brushStrengthFocus)
+      {
+        setBrushStrength();
+      }
+      paintAtIntervals(event.target);
     }
-    paintAtIntervals(event.target);
   })
 }
 

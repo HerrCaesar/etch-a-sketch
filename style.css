@@ -15,14 +15,13 @@
 {
     justify-content: space-between;
     flex-grow: 1;
-    margin: 10px 0;
+    margin-bottom: 10px;
 }
 
 #colour-grid
 {
     height: 40px;
     width: 100px;
-    border: 1px solid black;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(2, 1fr);
@@ -44,23 +43,24 @@
     align-items: center;
 }
 
-
-input:focus
-{
-    outline-width: 0;
-}
-
 input[type=number]
 {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 10pt;
 }
 
+input[name=mode]
+{
+    margin-top: 4px;
+    width: 97.3px;
+}
+
 .container
 {
     display: grid;
     align-items: stretch;
-    border: 2px solid black;
+    border: 3px inset #bbbbbb;
+    background-color: white;
 }
 
 .button
@@ -88,10 +88,15 @@ input[type=number]
     border: 1px solid black;
 }
 
-.swatch-outline
+.swatch-outline, input[type=number]:focus
 {
-    outline: 2px outset #999999;
+    outline: 2px inset #e6e6e6;
     z-index: 10;
+}
+
+input:focus
+{
+    outline-style: none;
 }
 
 body
@@ -101,4 +106,16 @@ body
     align-items: center;
     font-family: Arial, Helvetica, sans-serif;
     font-size: 11pt;
+    background-color: rgb(213, 252, 239);
+    display: table-cell;
+    vertical-align: middle;
+}
+
+html, body {
+    height: 100%;
+}
+
+html {
+    display: table;
+    margin: auto;
 }
